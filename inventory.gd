@@ -66,16 +66,15 @@ class Slot:
 			set_tooltip("")
 	
 	func can_drop_data(p, v):
-		print("Hello"+str(self)+str(p)+str(v))
 		return can_add_stack(v[1])
 	
 	func drop_data(p, v):
-		if !add_stack(v[1]):
+		if !add_stack(v[1]) && v[0].has_method("add_stack"):
 			v[0].add_stack(remove())
 			add_stack(v[1])
 		v[0].stop_monitoring_drag()
 	
-	func get_drag_data(v):
+	func get_drag_data(p):
 		if stack == null:
 			return null
 		# drag data is an array containing
@@ -258,7 +257,6 @@ func _ready():
 		cols = size
 	var rows = (size-1)/5 + 1
 	collapse(collapsed)
-	add_items("Green GoBot", 1)
 
 func collapse(c):
 	collapsed = c
@@ -334,6 +332,7 @@ func has_empty_slots():
 			return true
 	return false
 
+# Add an item stack
 func add_stack(s, merge = true):
 	if merge:
 		for slot in slots:
@@ -345,12 +344,14 @@ func add_stack(s, merge = true):
 			return true
 	return false
 
+# Add items (by name, count)
 func add_items(n, c):
 	var itemdesc = ItemDatabase.get_item(n)
 	if itemdesc == null:
 		return false
 	return add_stack(ObjectStack.new(itemdesc, c))
 
+# Remove items (by name, count)
 func remove_items(n, c):
 	if (count_items(n) < c):
 		return false
@@ -364,6 +365,7 @@ func remove_items(n, c):
 				c -= slot.stack.count
 				slot.remove()
 
+# Count items by name
 func count_items(n):
 	var itemdesc = ItemDatabase.get_item(n)
 	if itemdesc == -1:
@@ -374,9 +376,11 @@ func count_items(n):
 			count += slot.stack.count
 	return count
 
+# This method is called whenever the inventory contents changes. Overload if needed 
 func on_Update_inventory_contents():
 	pass
 
+# Return the contents of the inventory in a dictionary (useful for saving state)
 func get_state():
 	var s = {}
 	for slot in slots:
@@ -384,11 +388,10 @@ func get_state():
 			s[slot.get_name()] = { item = slot.stack.item, count = slot.stack.count }
 	return s
 
+# Fill the inventory from a dictionary (useful for loading state)
 func set_state(s):
 	for slot in slots:
 		var name = slot.get_name()
 		if s.has(name):
 			var contents = s[name]
 			slot.set(ObjectStack.new(contents.item, contents.count))
-
-

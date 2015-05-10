@@ -8,7 +8,7 @@ func _ready():
 	# Initialization here
 	pass
 
-func get_drag_data(v):
+func get_drag_data(p):
 	var stack = ObjectStack.new(itemid, 1)
 	var object = [self, stack]
 	remove_child(stack)
