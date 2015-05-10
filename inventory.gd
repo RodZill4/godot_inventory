@@ -190,6 +190,7 @@ class Slot:
 			menu.add_item("Destroy", MENU_DESTROY)
 			if menu.get_item_count() > 0:
 				add_child(menu)
+				get_parent().move_to_front()
 				menu.set_pos(pos)
 				menu.popup()
 				return
@@ -275,13 +276,16 @@ func collapse(c):
 		set_size(Vector2(9+(SLOT_SIZE + 5)*cols, 27+top_space+(SLOT_SIZE + 5)*rows))
 	else:
 		set_size(Vector2(9+(SLOT_SIZE + 5)*cols, 27))
-		
+
+func move_to_front():
+	get_parent().move_child(self, get_parent().get_child_count()-1)
+
 func _input_event(event):
 	# handle left mouse button on the panel to move it
 	if event.type == InputEvent.MOUSE_BUTTON && event.button_index == 1 && event.pressed:
 		if CAN_DRAG_WINDOW:
 			moving = true
-			get_parent().move_child(self, get_parent().get_child_count()-1)
+			move_to_front()
 			old_mouse_pos = event.pos
 		else:
 			collapse(!collapsed)
@@ -310,6 +314,7 @@ func show_menu(pos):
 	if menu != null:
 		menu.queue_free()
 	menu = PopupMenu.new()
+	move_to_front()
 	add_child(menu)
 	menu.connect("item_pressed", self, "_menu_item")
 	menu.add_item("Compact", MENU_COMPRESS)
